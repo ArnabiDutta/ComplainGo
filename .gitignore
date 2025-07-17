@@ -1,0 +1,23 @@
+# Environment folder
+# This matches any folder named "complaingo" at the root of the project.
+complaingo/
+
+# If your venv folder is named "venv" or "venv_final", use that instead:
+venv/
+venv_final/
+
+# Secret keys
+.env
+
+# Python cache
+__pycache__/
+*.pyc
+
+# Temporary files
+temp_image.jpg
+captcha_screenshot.png
+
+# IDE and OS files (Good practice to add these)
+.idea/
+.vscode/
+*.DS_Store
