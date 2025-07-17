@@ -1,0 +1,3 @@
+0 Damaged Road
+1 Water Logging
+2 Streetlight

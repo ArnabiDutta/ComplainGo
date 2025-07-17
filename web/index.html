@@ -1,0 +1,77 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>PWD Complaint Replica</title>
+    <style>
+        body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background-color: #f4f4f4; margin: 0; padding: 20px; }
+        .container { max-width: 800px; margin: auto; background-color: #fff; padding: 30px; border-radius: 8px; box-shadow: 0 2px 10px rgba(0,0,0,0.1); }
+        h1 { color: #0056b3; border-bottom: 2px solid #0056b3; padding-bottom: 10px; margin-bottom: 20px; }
+        .form-row { display: flex; justify-content: space-between; margin-bottom: 15px; }
+        .form-group { display: flex; flex-direction: column; width: 48%; }
+        .form-group.full-width { width: 100%; }
+        label { margin-bottom: 5px; font-weight: 600; color: #333; }
+        input[type="text"], select, textarea {
+            padding: 10px; border: 1px solid #ccc; border-radius: 4px; font-size: 1em;
+        }
+        textarea { resize: vertical; height: 80px; }
+        .button-container { text-align: center; margin-top: 20px; }
+        button { background-color: #f0ad4e; color: white; padding: 10px 20px; border: none; border-radius: 4px; font-size: 1.1em; cursor: pointer; transition: background-color 0.3s; }
+        button:hover { background-color: #ec971f; }
+        .file-upload-info { font-size: 0.9em; color: #777; margin-left: 10px; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Submit Complaint (Demo)</h1>
+        <form id="complaintForm">
+            <div class="form-row">
+                <div class="form-group">
+                    <label for="ContactNo">Contact No.</label>
+                    <input type="text" id="ContactNo" name="ContactNo" placeholder="Enter Contact Number">
+                </div>
+                <div class="form-group">
+                    <label for="ComplainantName">Complainant Name</label>
+                    <input type="text" id="ComplainantName" name="ComplainantName" placeholder="Enter Complainant Name">
+                </div>
+            </div>
+            <div class="form-row">
+                <div class="form-group full-width">
+                    <label for="ComplaintType">Complaint (Related to)</label>
+                    <select id="ComplaintType" name="ComplaintType">
+                        <option value="">--Select One--</option>
+                        <option value="4">Damaged Road</option>
+                        <option value="2">Water Logging</option>
+                        <option value="1">Streetlight</option>
+                    </select>
+                </div>
+            </div>
+            <div class="form-row">
+                 <div class="form-group full-width">
+                    <label for="ComplaintLocation">Complaint Location</label>
+                    <input type="text" id="ComplaintLocation" name="ComplaintLocation" placeholder="Enter Complaint Location">
+                </div>
+            </div>
+            <div class="form-row">
+                <div class="form-group full-width">
+                    <label for="ComplaintComment">Complaint/Comment</label>
+                    <textarea id="ComplaintComment" name="ComplaintComment" placeholder="Enter Complaint Details"></textarea>
+                </div>
+            </div>
+             <div class="form-row">
+                <div class="form-group full-width">
+                    <label for="Image">Image, if any</label>
+                    <div>
+                        <input type="file" id="Image" name="Image">
+                        <span id="file-upload-info" class="file-upload-info">No file chosen</span>
+                    </div>
+                </div>
+            </div>
+            <div class="button-container">
+                <button type="button" onclick="alert('Form Submitted Successfully!')">Submit</button>
+            </div>
+        </form>
+    </div>
+</body>
+</html>
