@@ -1,1 +1,13 @@
-google-chrome-stable
+# This is a shell script that adds Google's repository and then installs Chrome.
+
+# 1. Add Google's signing key to verify packages
+wget -q -O - https://dl-ssl.google.com/linux/linux_signing_key.pub | apt-key add -
+
+# 2. Add Google's repository to the system's sources list
+sh -c 'echo "deb [arch=amd64] http://dl.google.com/linux/chrome/deb/ stable main" >> /etc/apt/sources.list.d/google.list'
+
+# 3. Update the package list to include the new repository
+apt-get update
+
+# 4. Now, install the package
+apt-get install -y google-chrome-stable
