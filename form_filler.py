@@ -3,6 +3,7 @@ from selenium.webdriver.common.by import By
 from selenium.webdriver.chrome.service import Service
 from selenium.webdriver.support.ui import Select # Needed for the dropdown
 from webdriver_manager.chrome import ChromeDriverManager
+from webdriver_manager.core.utils import ChromeType # ### 1. ADD THIS LINE ###
 import time
 import os
 
@@ -19,7 +20,9 @@ def submit_to_replica_form(user_details, complaint_details):
     
     # Set up the Selenium WebDriver
     try:
-        service = Service(ChromeDriverManager().install())
+        # --- THIS IS THE ONLY LINE THAT CHANGES --- ### 2. CHANGE THIS LINE ###
+        service = Service(ChromeDriverManager(chrome_type=ChromeType.CHROMIUM).install())
+        
         driver = webdriver.Chrome(service=service)
         driver.get(FORM_URL)
         time.sleep(2) # Wait for the page to load
