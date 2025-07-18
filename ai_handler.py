@@ -2,17 +2,28 @@ import os
 import numpy as np
 from PIL import Image, ImageOps
 import tflite_runtime.interpreter as tflite
-from huggingface_hub import InferenceClient
-# We no longer import streamlit or try to get secrets here
+import google.generativeai as genai  # <-- CHANGE #1: Import Google's library
+import streamlit as st                 # <-- CHANGE #2: Import Streamlit to use st.secrets
 
 # --- Paths to Model and Labels ---
 MODEL_PATH = "model.tflite"
 LABELS_PATH = "labels.txt"
 
-# --- The client is now initialized inside the function ---
+# --- Configure the Google AI Client using st.secrets ---
+# This is the "Streamlit way" that works both locally and deployed.
+try:
+    GOOGLE_API_KEY = st.secrets["GOOGLE_API_KEY"] # <-- CHANGE #3: Get the Google key
+    genai.configure(api_key=GOOGLE_API_KEY)
+except (AttributeError, KeyError):
+    # This is a fallback in case the secret isn't set.
+    print("WARNING: GOOGLE_API_KEY secret not found.")
+    GOOGLE_API_KEY = None
+
 
 def classify_image(image_data):
-    # This function is fine and needs no changes
+    """
+    (This function is perfect and does not need any changes)
+    """
     np.set_printoptions(suppress=True)
     try:
         interpreter = tflite.Interpreter(model_path=MODEL_PATH)
@@ -42,30 +53,37 @@ def classify_image(image_data):
         return f"Prediction Error: {e}", 0.0
 
 
-def generate_complaint_text(category, hf_token): # <-- 1. ACCEPT THE TOKEN AS AN ARGUMENT
+def generate_complaint_text(category): # <-- CHANGE #4: No longer need to pass the token
     """
-    Generate complaint text using the provided Hugging Face token.
+    Generate complaint text using the reliable Google Gemini API.
     """
-    if not hf_token:
-        print("WARNING: No Hugging Face token provided. Returning template.")
-        return f"This is a formal complaint regarding a '{category}' that requires immediate attention."
+    if not GOOGLE_API_KEY:
+        print("WARNING: Google API Key not available. Returning template.")
+        return f"This is a formal complaint regarding a '{category}' issue that requires immediate attention."
 
-    # Initialize the client here, inside the function
-    client = InferenceClient(token=hf_token)
-    MODEL_ID = "mistralai/Mistral-7B-Instruct-v0.2"
-    
-    messages = [
-        {"role": "system", "content": "You are an AI assistant writing a formal, concise, and clear complaint for a Public Works Department (PWD) in India. The tone must be serious and urgent. Respond only with the complaint text itself."},
-        {"role": "user", "content": f"Based on examples, write a complaint for the category: {category}"}
-    ]
-    
     try:
-        response = client.chat_completion(
-            messages=messages,
-            model=MODEL_ID,
-            max_tokens=100
-        )
-        return response.choices[0].message.content.strip()
+        # Initialize the specific Gemini model
+        model = genai.GenerativeModel('gemini-1.5-flash-latest')
+        
+        # Simple, direct prompt for Gemini
+        prompt = f"""You are an AI assistant writing a formal, concise, and clear complaint for a Public Works Department (PWD) in India. The tone must be serious and urgent. Respond only with the complaint text itself, nothing else.
+
+Based on the examples below, write the complaint for the final category.
+
+Example 1:
+Category: Water Logging
+Complaint: There is significant water accumulation on the road, making it impassable for pedestrians and disrupting traffic flow. Urgent action is needed to clear the water and fix the underlying drainage issue.
+
+Example 2:
+Category: Broken Streetlight
+Complaint: The streetlight at this location is non-functional, creating a dark and unsafe area at night. Immediate repair is requested to ensure public safety.
+
+Category: {category}
+Complaint:"""
+        
+        response = model.generate_content(prompt)
+        return response.text.strip()
+
     except Exception as e:
-        print(f"ERROR: Hugging Face generation failed. Details: {e}")
+        print(f"ERROR: Google Gemini API failed. Details: {e}")
         return f"This is a formal complaint regarding a '{category}' issue."
