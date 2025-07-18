@@ -3,29 +3,16 @@ import numpy as np
 from PIL import Image, ImageOps
 import tflite_runtime.interpreter as tflite
 from huggingface_hub import InferenceClient
-import streamlit as st  # <--- 1. IMPORT STREAMLIT
+# We no longer import streamlit or try to get secrets here
 
 # --- Paths to Model and Labels ---
-# Using relative paths is best for deployment
 MODEL_PATH = "model.tflite"
 LABELS_PATH = "labels.txt"
 
-# --- Get the Secret API Key using st.secrets ---
-# This is the "Streamlit way" and will work both locally and when deployed.
-try:
-    HF_TOKEN = st.secrets["HUGGING_FACE_API_KEY"] # <--- 2. GET THE SECRET
-except (AttributeError, KeyError):
-    # This is a fallback for if you run the script outside of Streamlit
-    # or forget to set the secret.
-    HF_TOKEN = "" 
-
-# --- Initialize Hugging Face Client ---
-MODEL_ID = "mistralai/Mistral-7B-Instruct-v0.2"
-client = InferenceClient(model=MODEL_ID, token=HF_TOKEN)
-
+# --- The client is now initialized inside the function ---
 
 def classify_image(image_data):
-    # ... (This function is already perfect and needs NO changes) ...
+    # This function is fine and needs no changes
     np.set_printoptions(suppress=True)
     try:
         interpreter = tflite.Interpreter(model_path=MODEL_PATH)
@@ -35,8 +22,7 @@ def classify_image(image_data):
         with open(LABELS_PATH, 'r') as f:
             class_names = [line.strip().split(' ', 1)[1] for line in f if line.strip()]
     except Exception as e:
-        print(f"ERROR: Could not load model or labels. Details: {e}")
-        return "Model/Label Error", 0.0
+        return f"Model/Label Error: {e}", 0.0
     try:
         image = Image.open(image_data).convert('RGB')
         height = input_details[0]['shape'][1]
@@ -53,24 +39,32 @@ def classify_image(image_data):
         confidence_score = float(output_data[index])
         return class_name, confidence_score
     except Exception as e:
-        print(f"ERROR: Image prediction failed. Details: {e}")
-        return "Prediction Error", 0.0
+        return f"Prediction Error: {e}", 0.0
 
 
-def generate_complaint_text(category):
+def generate_complaint_text(category, hf_token): # <-- 1. ACCEPT THE TOKEN AS AN ARGUMENT
     """
-    (This function is already perfect and needs NO changes)
+    Generate complaint text using the provided Hugging Face token.
     """
-    if not HF_TOKEN:
-        print("WARNING: Hugging Face API key not found. Returning template response.")
+    if not hf_token:
+        print("WARNING: No Hugging Face token provided. Returning template.")
         return f"This is a formal complaint regarding a '{category}' that requires immediate attention."
 
+    # Initialize the client here, inside the function
+    client = InferenceClient(token=hf_token)
+    MODEL_ID = "mistralai/Mistral-7B-Instruct-v0.2"
+    
     messages = [
-        {"role": "system", "content": "You are an AI assistant writing a formal, concise, and clear complaint for a Public Works Department (PWD) in India. The tone must be serious and urgent. Respond only with the complaint text itself, nothing else."},
+        {"role": "system", "content": "You are an AI assistant writing a formal, concise, and clear complaint for a Public Works Department (PWD) in India. The tone must be serious and urgent. Respond only with the complaint text itself."},
         {"role": "user", "content": f"Based on examples, write a complaint for the category: {category}"}
     ]
+    
     try:
-        response = client.chat_completion(messages=messages, max_tokens=100)
+        response = client.chat_completion(
+            messages=messages,
+            model=MODEL_ID,
+            max_tokens=100
+        )
         return response.choices[0].message.content.strip()
     except Exception as e:
         print(f"ERROR: Hugging Face generation failed. Details: {e}")
