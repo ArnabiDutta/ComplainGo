@@ -31,11 +31,12 @@ def display_login_page():
             else: st.error("Please enter both your name and phone number.")
 
 # --- Main App Page ---
+# --- Main App Page ---
 def display_main_app():
-    # ... Sidebar and Image Capture (No changes) ...
+    # ... (sidebar and image capture code is the same) ...
     with st.sidebar:
         st.title(f"Hi, {st.session_state.user_name.split(' ')[0]}!")
-        st.markdown(f'<div style="text-align: center;"><img src="https://static.vecteezy.com/system/resources/previews/009/229/244/original/default-avatar-icon-of-social-media-user-vector.jpg" width="100" style="border-radius: 50%;"></div>', unsafe_allow_html=True)
+        st.markdown(f'<div style="text-align: center;"><img src="https://static.vecteezy.com/system/resources/previews/009/292/244/original/default-avatar-icon-of-social-media-user-vector.jpg" width="100" style="border-radius: 50%;"></div>', unsafe_allow_html=True)
         if st.button("Logout"):
             for key in st.session_state.keys(): del st.session_state[key]
             st.rerun()
@@ -56,25 +57,34 @@ def display_main_app():
         with col2:
             st.subheader("⚙️ AI Analysis & Submission in Progress...")
             st.image(image_data, caption="Analyzing this image...")
-            with st.spinner("AI is working its magic..."):
-                # 1. Run classification (no change)
+            
+            with st.spinner("AI is working its magic... Please be patient on the first run!"):
+                # --- THIS IS THE NEW DEBUGGING BLOCK ---
+                
+                st.write("✅ Step 1: Starting image classification...")
                 category, confidence = classify_image(image_data)
+                st.write(f"✅ Step 1 COMPLETE. Category found: {category}")
                 
-                # 2. Call the generation function (it gets the key by itself now)
+                st.write("⏳ Step 2: Calling Google Gemini API... (This may take up to 60 seconds on the first try)")
                 description = generate_complaint_text(category)
+                st.write("✅ Step 2 COMPLETE. Complaint text generated.")
                 
-                # --- (Rest of the logic is the same) ---
+                st.write("🚀 Step 3: Starting browser automation on the server...")
                 with open("temp_image.jpg", "wb") as f:
                     f.write(image_data.getbuffer())
                 submission_success = submit_to_replica_form(
                     user_details={"name": st.session_state.user_name, "phone": st.session_state.phone_number},
                     complaint_details={"category": category, "description": description, "image_path": "temp_image.jpg"}
                 )
+                st.write("✅ Step 3 COMPLETE. Form filled.")
+                
+                # --- End of debugging block ---
+
                 st.session_state.results = {"category": category, "confidence": f"{confidence:.0%}", "description": description, "success": submission_success}
                 st.session_state.image_processed = True
         st.rerun()
 
-    # --- Display Final Results (No changes) ---
+    # --- Display Final Results (No changes needed) ---
     if st.session_state.get('image_processed', False):
         with col2:
             results = st.session_state.results
@@ -88,6 +98,8 @@ def display_main_app():
             if st.button("File Another Complaint"):
                 st.session_state.image_processed = False
                 st.session_state.pop('results', None); st.rerun()
+
+# ... (The rest of your app.py is the same) ...
 
 # --- Main Router (No changes) ---
 if not st.session_state.get('logged_in', False):
