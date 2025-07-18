@@ -8,7 +8,7 @@ from ai_handler import classify_image, generate_complaint_text
 from form_filler import submit_to_replica_form
 
 # --- Page Configuration and CSS (No changes) ---
-st.set_page_config(page_title="Complaingo", page_icon="🌿", layout="wide", initial_sidebar_state="collapsed")
+st.set_page_config(page_title="Complaingo", page_icon="", layout="wide", initial_sidebar_state="collapsed")
 st.markdown("""<style>@import url('https://fonts.googleapis.com/css2?family=Montserrat:wght@400;600;700&display=swap');:root{--sage-green:#8A9A5B;--dark-sage:#556B2F;--light-ivory:#FFFFF0;--text-color:#36454F}html,body,[class*="st-"]{font-family:'Montserrat',sans-serif;color:var(--text-color)}.stApp{background-color:var(--light-ivory)}h1,h2,h3{color:var(--dark-sage);font-weight:700}.stButton>button{color:#FFFFFF;background-color:var(--sage-green);border:2px solid var(--sage-green);border-radius:50px;padding:12px 30px;font-weight:600;transition:all .3s ease-in-out;box-shadow:0 4px 14px 0 rgba(0,0,0,0.1)}.stButton>button:hover{background-color:var(--dark-sage);border-color:var(--dark-sage);transform:translateY(-3px);box-shadow:0 6px 20px 0 rgba(0,0,0,0.15)}[data-testid=stTextInput] input,[data-testid=stFileUploader]{border-radius:10px;border:2px solid var(--sage-green)}[data-testid=stSidebar]{background-color:#FFFFFF;border-right:2px solid #F0F0F0}</style>""", unsafe_allow_html=True)
 
 # --- Session State (No changes) ---
@@ -57,15 +57,11 @@ def display_main_app():
             st.subheader("⚙️ AI Analysis & Submission in Progress...")
             st.image(image_data, caption="Analyzing this image...")
             with st.spinner("AI is working its magic..."):
-                # --- THIS IS THE CHANGE ---
-                # 1. Get the secret here in the main app script
-                hf_token = st.secrets.get("HUGGING_FACE_API_KEY", "")
-
-                # 2. Run classification (no change)
+                # 1. Run classification (no change)
                 category, confidence = classify_image(image_data)
                 
-                # 3. Pass the secret token to the generation function
-                description = generate_complaint_text(category, hf_token)
+                # 2. Call the generation function (it gets the key by itself now)
+                description = generate_complaint_text(category)
                 
                 # --- (Rest of the logic is the same) ---
                 with open("temp_image.jpg", "wb") as f:
