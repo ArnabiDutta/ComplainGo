@@ -8,7 +8,7 @@ from ai_handler import classify_image, generate_complaint_text
 from form_filler import submit_to_replica_form
 
 # --- Page Configuration and CSS (No changes) ---
-st.set_page_config(page_title="Complaingo", page_icon="", layout="wide", initial_sidebar_state="collapsed")
+st.set_page_config(page_title="Complaingo", page_icon="🌿", layout="wide", initial_sidebar_state="collapsed") # Changed icon
 st.markdown("""<style>@import url('https://fonts.googleapis.com/css2?family=Montserrat:wght@400;600;700&display=swap');:root{--sage-green:#8A9A5B;--dark-sage:#556B2F;--light-ivory:#FFFFF0;--text-color:#36454F}html,body,[class*="st-"]{font-family:'Montserrat',sans-serif;color:var(--text-color)}.stApp{background-color:var(--light-ivory)}h1,h2,h3{color:var(--dark-sage);font-weight:700}.stButton>button{color:#FFFFFF;background-color:var(--sage-green);border:2px solid var(--sage-green);border-radius:50px;padding:12px 30px;font-weight:600;transition:all .3s ease-in-out;box-shadow:0 4px 14px 0 rgba(0,0,0,0.1)}.stButton>button:hover{background-color:var(--dark-sage);border-color:var(--dark-sage);transform:translateY(-3px);box-shadow:0 6px 20px 0 rgba(0,0,0,0.15)}[data-testid=stTextInput] input,[data-testid=stFileUploader]{border-radius:10px;border:2px solid var(--sage-green)}[data-testid=stSidebar]{background-color:#FFFFFF;border-right:2px solid #F0F0F0}</style>""", unsafe_allow_html=True)
 
 # --- Session State (No changes) ---
@@ -18,7 +18,6 @@ if 'logged_in' not in st.session_state:
 
 # --- Login Page (No changes) ---
 def display_login_page():
-    # ... same as before
     st.title("Welcome to Complaingo 🌿")
     st.header("*Jo Dikhe, Bol Do — On-the-Go!*")
     st.markdown("---")
@@ -31,9 +30,7 @@ def display_login_page():
             else: st.error("Please enter both your name and phone number.")
 
 # --- Main App Page ---
-# --- Main App Page ---
 def display_main_app():
-    # ... (sidebar and image capture code is the same) ...
     with st.sidebar:
         st.title(f"Hi, {st.session_state.user_name.split(' ')[0]}!")
         st.markdown(f'<div style="text-align: center;"><img src="https://static.vecteezy.com/system/resources/previews/009/292/244/original/default-avatar-icon-of-social-media-user-vector.jpg" width="100" style="border-radius: 50%;"></div>', unsafe_allow_html=True)
@@ -58,27 +55,21 @@ def display_main_app():
             st.subheader("⚙️ AI Analysis & Submission in Progress...")
             st.image(image_data, caption="Analyzing this image...")
             
-            with st.spinner("AI is working its magic... Please be patient on the first run!"):
-                # --- THIS IS THE NEW DEBUGGING BLOCK ---
+            with st.spinner("AI is working its magic..."):
+                # --- THIS IS THE CLEANED UP BLOCK ---
                 
-                st.write("✅ Step 1: Starting image classification...")
+                # The debug st.write() messages have been removed.
                 category, confidence = classify_image(image_data)
-                st.write(f"✅ Step 1 COMPLETE. Category found: {category}")
-                
-                st.write("⏳ Step 2: Calling Google Gemini API... (This may take up to 60 seconds on the first try)")
                 description = generate_complaint_text(category)
-                st.write("✅ Step 2 COMPLETE. Complaint text generated.")
                 
-                st.write("🚀 Step 3: Starting browser automation on the server...")
                 with open("temp_image.jpg", "wb") as f:
                     f.write(image_data.getbuffer())
                 submission_success = submit_to_replica_form(
                     user_details={"name": st.session_state.user_name, "phone": st.session_state.phone_number},
                     complaint_details={"category": category, "description": description, "image_path": "temp_image.jpg"}
                 )
-                st.write("✅ Step 3 COMPLETE. Form filled.")
                 
-                # --- End of debugging block ---
+                # --- End of cleaned up block ---
 
                 st.session_state.results = {"category": category, "confidence": f"{confidence:.0%}", "description": description, "success": submission_success}
                 st.session_state.image_processed = True
@@ -98,8 +89,6 @@ def display_main_app():
             if st.button("File Another Complaint"):
                 st.session_state.image_processed = False
                 st.session_state.pop('results', None); st.rerun()
-
-# ... (The rest of your app.py is the same) ...
 
 # --- Main Router (No changes) ---
 if not st.session_state.get('logged_in', False):
