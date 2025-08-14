@@ -18,7 +18,7 @@ if 'logged_in' not in st.session_state:
 
 # --- Login Page (No changes) ---
 def display_login_page():
-    st.title("Welcome to Complaingo 🌿")
+    st.title("Welcome to Complaingo")
     st.header("*Jo Dikhe, Bol Do — On-the-Go!*")
     st.markdown("---")
     with st.form("login_form"):
